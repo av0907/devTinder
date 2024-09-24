@@ -1,27 +1,43 @@
 const express = require("express");
 
+const {connectDb} = require("./config/database");
+
 const app= express();
 
-app.listen(3000,()=>{
-    console.log("Aditya Vishnu's first Express Server")
-});
+const User = require("./models/user");
 
-app.use("/home",(req,res)=>{
-    res.send("Home Page")
+connectDb().then(
+    (data)=>{
+        console.log("DB Connection Successfull" + data);
+        app.listen(3000,(req,res)=>{
+            console.log("Express server is listening");
+        })
+    }
+)
+.catch(
+    ()=>{
+        console.error("DB connection failed!!");
+    }
+)
+
+app.post("/signup" ,async (req,res)=>{
+
+    const data = {
+        firstName: "RK",
+        lastName: "O",
+    }
+
+    const user = new User(data);
+
+    try{
+        await user.save();
+        res.send("Inserted successfully");
+    }
+    catch(e)
+    {
+        res.status(400).send("Error saving the data to DB");
+    }
+    
 })
 
-app.use("/first/one",(req,res)=>{
-    res.send("First One Page");
-})
 
-app.use("/first",(req,res)=>{
-    res.send("First Page");
-})
-
-app.use("/second",(req,res)=>{
-    res.send("Second Page");
-})
-
-app.use("/third",(req,res)=>{
-    res.send("Third Page");
-})
