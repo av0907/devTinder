@@ -20,15 +20,13 @@ connectDb().then(
     }
 )
 
+app.use(express.json());
+
 app.post("/signup" ,async (req,res)=>{
 
-    const data = {
-        firstName: "RK",
-        lastName: "O",
-    }
-
-    const user = new User(data);
-
+    //The below line of code refers to creating a new instance of User Model
+    const user = new User(req.body);
+    
     try{
         await user.save();
         res.send("Inserted successfully");
@@ -41,3 +39,25 @@ app.post("/signup" ,async (req,res)=>{
 })
 
 
+app.get("/feed", async (req,res)=>{
+
+    const user = await User.find({});
+    if(user.length===0)
+    {
+        res.status(404).send("Users not found");
+    }
+    else{
+        res.send(user);
+    }
+})
+
+app.get("/user", async (req,res)=>{
+    try{
+       const returnedUser =  await User.findOne({firstName : req.body.fName})
+       res.status(200).send(returnedUser);
+    }
+    catch(err)
+    {
+        res.status(404).send("User Not Found");
+    }
+})
