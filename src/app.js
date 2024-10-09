@@ -1,10 +1,18 @@
 const express = require("express");
 
 const {connectDb} = require("./config/database");
+const cookieParser = require("cookie-parser");
+//var jwt = require("jsonwebtoken");
+var {userAuth} = require("./middlewares/userAuth.js");
+
+var authRouter = require("./routes/auth.js")
+var profileRouter = require("./routes/profile.js")
+var requestsRouter = require("./routes/requests.js");
+const userRouter = require("./routes/user.js");
 
 const app= express();
 
-const User = require("./models/user");
+
 
 connectDb().then(
     (data)=>{
@@ -21,43 +29,9 @@ connectDb().then(
 )
 
 app.use(express.json());
+app.use(cookieParser());
 
-app.post("/signup" ,async (req,res)=>{
-
-    //The below line of code refers to creating a new instance of User Model
-    const user = new User(req.body);
-    
-    try{
-        await user.save();
-        res.send("Inserted successfully");
-    }
-    catch(e)
-    {
-        res.status(400).send("Error saving the data to DB");
-    }
-    
-})
-
-
-app.get("/feed", async (req,res)=>{
-
-    const user = await User.find({});
-    if(user.length===0)
-    {
-        res.status(404).send("Users not found");
-    }
-    else{
-        res.send(user);
-    }
-})
-
-app.get("/user", async (req,res)=>{
-    try{
-       const returnedUser =  await User.findOne({firstName : req.body.fName})
-       res.status(200).send(returnedUser);
-    }
-    catch(err)
-    {
-        res.status(404).send("User Not Found");
-    }
-})
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestsRouter);
+app.use("/", userRouter);
